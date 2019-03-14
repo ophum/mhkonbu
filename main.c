@@ -39,6 +39,38 @@ int main(int argc, char **argv)
 				}
 				printf("<h%d>\n", cnt);
 				break;
+			default:
+				printf("<p>");
+				cnt = 0;
+				while((ch = fgetc(fp)) != EOF)
+				{
+					if(ch == '\n')
+					{
+						if(cnt == 0) break;
+
+						cnt = 0;
+						continue;
+					}
+					switch(ch)
+					{
+						case ' ':
+							ch = fgetc(fp);
+							if(ch == ' ')
+							{
+								printf("<br>");
+							}else {
+								putchar(' ');
+								ungetc(ch, fp);
+							}
+							break;
+						default:
+							putchar(ch);
+							break;
+					}
+					cnt++;
+				}
+				printf("</p>\n");
+				break;
 		}
 	}
 
