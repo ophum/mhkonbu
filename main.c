@@ -31,6 +31,38 @@ int main(int argc, char **argv)
     switch(ch)
     {
       case '\n': col = 0; break;
+      case '-':
+        cnt = 1;
+        while((ch = fgetc(fp)) != EOF)
+        {
+          if(ch == '-') cnt++;
+          else if(ch == ' ') continue;
+          else
+          {
+            ungetc(ch, fp);
+            break;
+          }
+        }
+
+        if(cnt == 1)
+        {
+          printf("<li>");
+
+          while((ch = fgetc(fp)) != EOF)
+          {
+            if(ch == '\n')
+            {
+              break;
+            }else {
+              putchar(ch);
+            }
+          }
+
+          printf("</li>");
+        }else {
+          printf("<hr>");
+        }
+        break;
       case '#':
         for(cnt = 1; (ch = fgetc(fp)) == '#'; cnt++);
         printf("<h%d>%c", cnt, ch);			
@@ -72,6 +104,7 @@ int main(int argc, char **argv)
         printf("</p>\n");
         break;
     }
+    putchar('\n');
   }
 
   fclose(fp);
