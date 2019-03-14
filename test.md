@@ -15,3 +15,10 @@ make sure it works correctly.
 
 this is sample mardown file.  
 make sure it works correctly.
+
+---
+
+- list1
+- list2
+
+- - -
