@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 				while((ch = fgetc(fp)) != EOF && ch != '\n'){
 					putchar(ch);
 				}
-				printf("<h%d>\n", cnt);
+				printf("</h%d>\n", cnt);
 				break;
 			default:
 				printf("<p>");
