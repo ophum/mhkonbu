@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         printf("</h%d>\n", cnt);
         break;
       default:
-        printf("<p>");
+        printf("<p>%c", ch);
         cnt = 0;
         while((ch = fgetc(fp)) != EOF)
         {
