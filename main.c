@@ -1,112 +1,131 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "defines.h"
+
+int getFileSize(char *filename)
+{
+  struct stat st;
+  if(stat(filename, &st) == 0)
+  {
+    return st.st_size;
+  }
+  return -1;
+}
+
+int getLineLength(int *lsegs, int ln, int n){
+  if(ln == n) return 0; 
+  return lsegs[n + 1] - lsegs[n] - 1;
+}
 
 int main(int argc, char **argv)
 {
   char *filename;
+  char *body;
+  int *lsegs;
+  int fsize = 0;
+  int ln = 1;
   FILE *fp;
   int col = 0;
   int cnt;
   int ch;
-
+  int i, j, len;
+  int space = 0;
   if(argc < 2)
   {
     return 1;
   }
 
   filename = argv[1];
-
-  if((fp = fopen(filename, "r")) == NULL)
+  fsize = getFileSize(filename);
+  body = (char *)malloc(sizeof(char) * fsize);
+  
+  if(fsize == -1 || (fp = fopen(filename, "r")) == NULL)
   {
     return 1;
   }
 
-  while((ch = fgetc(fp)) != EOF)
+  fread(body, sizeof(char), fsize, fp);
+ 
+  for(i = 0; i < fsize; i++)
   {
-    if(col == 0 && ch == ' ') continue;
-    
-    switch(ch)
+    if(body[i] == '\n') ln++;
+  }
+
+  lsegs = (int *)malloc(sizeof(int) * ln + 1);
+  
+  lsegs[0] = 0;
+  for(i = 0, j = 1; i < fsize; i++)
+  {
+    if(body[i] == '\n') lsegs[j++] = i + 1;
+  }
+
+  fclose(fp);
+
+  printf("<pre>debug>\n");
+  for(i = 0; i < ln; i++)
+  {
+    printf("%04d:%.*s", i + 1, lsegs[i+1] - lsegs[i], &body[lsegs[i]]);
+  }
+  printf("</pre>\n");
+
+  for(i = 0; i < ln; i++)
+  {
+    switch(body[lsegs[i]])
     {
-      case '\n': col = 0; break;
-      case '-':
-        cnt = 1;
-        while((ch = fgetc(fp)) != EOF)
-        {
-          if(ch == '-') cnt++;
-          else if(ch == ' ') continue;
-          else
-          {
-            ungetc(ch, fp);
-            break;
-          }
-        }
-
-        if(cnt == 1)
-        {
-          printf("<li>");
-
-          while((ch = fgetc(fp)) != EOF)
-          {
-            if(ch == '\n')
-            {
-              break;
-            }else {
-              putchar(ch);
-            }
-          }
-
-          printf("</li>");
-        }else {
-          printf("<hr>");
-        }
-        break;
+      case ' ': space++;
+      case '\n': space = 0; break;
+      // heading
       case '#':
-        for(cnt = 1; (ch = fgetc(fp)) == '#'; cnt++);
-        printf("<h%d>%c", cnt, ch);			
-        while((ch = fgetc(fp)) != EOF && ch != '\n'){
-          putchar(ch);
-        }
-        printf("</h%d>\n", cnt);
+        for(j = 0; body[lsegs[i] + j] == '#'; j++);
+        printf("<h%d>%.*s</h%d>\n",
+            j,
+            getLineLength(lsegs, ln, i) - j,
+            &body[lsegs[i] + j],
+            j);
         break;
-      default:
-        printf("<p>%c", ch);
+      // horizontal
+      // list
+      case '-':
+        len = getLineLength(lsegs, ln, i);
         cnt = 0;
-        while((ch = fgetc(fp)) != EOF)
-        {
-          if(ch == '\n')
-          {
-            if(cnt == 0) break;
+        for(j = 0; j < len; j++){
+          if(body[lsegs[i] + j] == '-') cnt++;
+          else if(body[lsegs[i] + j] != ' ') break;
+        }
 
-            cnt = 0;
-            continue;
-          }
-          switch(ch)
+        if(cnt >= 3){ // horizontal
+          printf("<hr>\n");
+        }else if(cnt == 2){ // other
+          printf("%.*s\n", len, &body[lsegs[i]]);
+        }else { // list
+          printf("<li>%.*s</li>\n", len - j, &body[lsegs[i] + j]);
+        }
+        break;
+      // paragraph
+      default:
+        printf("<p>");
+        for(i; i < ln; i++)
+        {
+          if(body[lsegs[i+1]-2] == ' ' && body[lsegs[i+1]-3] == ' ')
           {
-            case ' ':
-              ch = fgetc(fp);
-              if(ch == ' ')
-              {
-                printf("<br>");
-              }else {
-                putchar(' ');
-                ungetc(ch, fp);
-              }
-              break;
-            default:
-              putchar(ch);
-              break;
+            printf("%.*s<br>",
+                getLineLength(lsegs, ln, i) - 2,
+                &body[lsegs[i]]);
+          }else {
+            printf("%.*s",
+                getLineLength(lsegs, ln, i),
+                &body[lsegs[i]]);
           }
-          cnt++;
+          if(body[lsegs[i]] == '\n') break; 
         }
         printf("</p>\n");
         break;
     }
-    putchar('\n');
   }
-
-  fclose(fp);
+  free(body);
+  free(lsegs);
   return 0;
 }
