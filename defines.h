@@ -6,6 +6,7 @@ enum ENUM_ElmType
 {
   E_HEADER,
   E_HR,
+  E_P,
   E_TABLE,
   E_STRIKE,
   E_BOLD,
