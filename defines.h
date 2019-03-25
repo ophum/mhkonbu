@@ -4,7 +4,7 @@
 typedef enum ENUM_ElmType ElmType;
 enum ENUM_ElmType 
 {
-  E_HEADER,
+  E_H1, E_H2, E_H3, E_H4, E_H5, E_H6,
   E_HR,
   E_P,
   E_TABLE,
