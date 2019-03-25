@@ -4,7 +4,36 @@
 #include <sys/stat.h>
 
 #include "defines.h"
+#include "list.h"
 
+void showList(List *l){
+  List *n = l;
+  int cnt = 0;
+  Elm *elm;
+  char elm_list[20][32] = {
+    "E_H1","E_H2","E_H3","E_H4","E_H5","E_H6",
+    "E_HR",
+    "E_P",
+    "E_TABLE",
+    "E_STRIKE",
+    "E_BOLD",
+    "E_ITALIC",
+    "E_CODE",
+    "E_BR",
+    "E_LIST",
+    "E_BLOCKQUOTE",
+    "E_LINK",
+
+  };
+
+  while(n != NULL){
+    if(n->data != NULL){
+      elm = (Elm *)(n->data);
+      printf("%04d : %s %s\n", cnt++, elm_list[elm->type], elm->content);
+    }
+    n = n->next;
+  }
+}
 int getFileSize(char *filename)
 {
   struct stat st;
@@ -33,6 +62,10 @@ int main(int argc, char **argv)
   int ch;
   int i, j, len;
   int space = 0;
+
+  List *list = new_list(NULL, NULL, NULL);
+  Elm *elm;
+
   if(argc < 2)
   {
     return 1;
@@ -79,12 +112,14 @@ int main(int argc, char **argv)
       case '\n': space = 0; break;
       // heading
       case '#':
+        elm = (Elm *)malloc(sizeof(Elm));
         for(j = 0; body[lsegs[i] + j] == '#'; j++);
-        printf("<h%d>%.*s</h%d>\n",
-            j,
-            getLineLength(lsegs, ln, i) - j,
-            &body[lsegs[i] + j],
-            j);
+        if(j >= 7) j = 6;
+        len = getLineLength(lsegs, ln, i) - j
+        elm->type = E_H1 + j - 1;
+        elm->content = (char *)malloc(sizeof(char) * (len + 1));
+        memcpy(elm->content, &body[lsegs[i] + j], len);
+        append_list(list, elm);
         break;
       // horizontal
       // list
@@ -106,6 +141,7 @@ int main(int argc, char **argv)
         break;
       // paragraph
       default:
+        
         printf("<p>");
         for(i; i < ln; i++)
         {
@@ -127,5 +163,7 @@ int main(int argc, char **argv)
   }
   free(body);
   free(lsegs);
+  showList(list);
+  del_list(list);
   return 0;
 }
