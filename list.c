@@ -19,15 +19,15 @@ List *new_list(List *prev, List *next, void *data){
 
 // list delete
 int del_list(List *l){
-  List *n;
+  List *n = l;
   List *d;
 
-  while(l != NULL){
-    if(l->data != NULL){
-      free(l->data);
+  while(n != NULL){
+    if(n->data != NULL){
+      free(n->data);
     }
-    d = l;
-    n = l->next;
+    d = n;
+    n = n->next;
     free(d);
   }
   return 0;
