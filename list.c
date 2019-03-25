@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "defines.h"
+#include "list.h"
 
 // list allocate
 List *new_list(List *prev, List *next, void *data){

@@ -25,11 +25,4 @@ struct DATA_ELM
   char *content;
 };
 
-typedef struct DATA_List List;
-struct DATA_List
-{
-  void *data;
-  List *prev, *next;
-};
-
 #endif /* DEF_DEFINES_H */
