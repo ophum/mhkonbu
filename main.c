@@ -115,7 +115,7 @@ int main(int argc, char **argv)
         elm = (Elm *)malloc(sizeof(Elm));
         for(j = 0; body[lsegs[i] + j] == '#'; j++);
         if(j >= 7) j = 6;
-        len = getLineLength(lsegs, ln, i) - j
+        len = getLineLength(lsegs, ln, i) - j;
         elm->type = E_H1 + j - 1;
         elm->content = (char *)malloc(sizeof(char) * (len + 1));
         memcpy(elm->content, &body[lsegs[i] + j], len);
@@ -141,23 +141,23 @@ int main(int argc, char **argv)
         break;
       // paragraph
       default:
-        
-        printf("<p>");
-        for(i; i < ln; i++)
-        {
-          if(body[lsegs[i+1]-2] == ' ' && body[lsegs[i+1]-3] == ' ')
+        elm = (Elm *)malloc(sizeof(Elm));
+        elm->type = E_P;
+        len = 0;
+        for(j = i; j < ln; j++){
+          if(body[lsegs[j+1]-2] == ' ' && body[lsegs[j+1]-3] == ' ')
           {
-            printf("%.*s<br>",
-                getLineLength(lsegs, ln, i) - 2,
-                &body[lsegs[i]]);
+            len += getLineLength(lsegs, ln, j) + 2; 
           }else {
-            printf("%.*s",
-                getLineLength(lsegs, ln, i),
-                &body[lsegs[i]]);
+            len += getLineLength(lsegs, ln, j) + 1;
           }
-          if(body[lsegs[i]] == '\n') break; 
+          if(body[lsegs[j]] == '\n') break; 
         }
-        printf("</p>\n");
+
+        elm->content = (char *)malloc(sizeof(char) * (len + 1));
+        memcpy(elm->content, &body[lsegs[i]], len);
+        append_list(list, elm);
+        i = j;
         break;
     }
   }
